@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 class Settings(BaseSettings):
     database_url: str
+    redis_url: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

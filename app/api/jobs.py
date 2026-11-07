@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.db.models import Job
 from app.db.session import get_db
 from app.schemas.jobs import JobCreate, JobRead
-
+from app.queue import enqueue_job
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
 
@@ -73,6 +73,7 @@ def create_job(
         ) from exc
 
     db.refresh(job)
+    enqueue_job(job.id, job.job_type)
     return job
 
 

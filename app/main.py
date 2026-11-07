@@ -5,8 +5,12 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.api.jobs import router as jobs_router
+from redis.exceptions import RedisError
+
+from app.redis_client import redis_client
 app = FastAPI(title="TaskFlow API")
 app.include_router(jobs_router)
+
 
 @app.get("/health")
 def health_check() -> dict[str, str]:
@@ -22,4 +26,15 @@ def database_health(db: Session = Depends(get_db)) -> dict[str, str]:
         raise HTTPException(
             status_code=503,
             detail="Database is unavailable",
+        ) from exc
+
+@app.get("/health/redis")
+def redis_health() -> dict[str, str]:
+    try:
+        redis_client.ping()
+        return {"redis": "ok"}
+    except RedisError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="Redis is unavailable",
         ) from exc
